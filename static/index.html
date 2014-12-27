@@ -24,16 +24,14 @@
 <script src="js/application.js"></script>
 <script id="igramPhotoTemplate" type="text/template">
 	<div id="{{id}}">
-		<header>
-			<h3>
-				{{user.full_name}}<br/>
-				<small><a href="http://instagram.com/{{user.username}}">@{{user.username}}</a></small>
-			</h3>
-		</header>
-		<section>
+		<a href="{{link}}">
 			<img alt="" src="{{images.standard_resolution.url}}">
-		</section>
-		<footer>{{caption.text}}</footer>
+		</a>
+		<footer>
+			{{caption.text}}<br/>
+			{{user.full_name}}<br/>
+			<small><a href="http://instagram.com/{{user.username}}">@{{user.username}}</a></small>
+		</footer>
 	</div>
 </script>
 </html>

@@ -54,18 +54,11 @@ body {
 .photo footer {
 	font-size: 0.8em;
 	line-height: 1.5;
+	word-wrap:break-word;
 }
-.photo header {
-	background: -webkit-linear-gradient(#024772 0%, #60abf8 68%, #7abcff 100%);
-	background: -o-linear-gradient(#024772 0%, #60abf8 68%, #7abcff 100%);
-	background: linear-gradient(#024772 0%, #60abf8 68%, #7abcff 100%);
-	color: white;
-}
-.photo header h3 {
-	font-family: Arvo;
-	font-weight: 600;
-	font-size: 1.061em;
-	line-height: 1.2
+.photo img {
+	border-top-left-radius:0.25em;
+	border-top-right-radius:0.25em;
 }
 .photo img {
 	width: 100%;

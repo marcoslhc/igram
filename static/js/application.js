@@ -264,9 +264,7 @@
 
 		build: build.bind(this),
 
-		get : function get(value) {
-
-		},
+		get : function get(value) {},
 
 		where: function where(attr, value) {
 
@@ -346,14 +344,24 @@
 					url:'http://127.0.0.1:3000/api/v1/media/search',
 					params:{
 						'lat':'26.105865599999998',
-						'lng':'-80.3666672'
+						'lng':'-80.3666672',
+						'distance':'16000'
 					}
 				},
 				{
 					url:'http://127.0.0.1:3000/api/v1/media/search',
 					params:{
 						'lat':'41.3850640',
-						'lng':'2.1734030'
+						'lng':'2.1734030',
+						'distance':'16000'
+					}
+				},
+				{
+					url:'http://127.0.0.1:3000/api/v1/media/search',
+					params:{
+						'lat':'10.1579310',
+						'lng':'-67.9972100',
+						'distance':'16000'
 					}
 				}
 			];
@@ -362,10 +370,8 @@
 				'access_token': window.localStorage['access_token'],
 				'client_id': IGRAM_CLIENT_ID
 			};
-counter =0;
 			renderView = function renderView(e) {
 				e.target.models.forEach(function (elm, idx, lst) {
-					counter++;
 					var view,
 						column = '#column-' + ((+idx%4)+1),
 						templateText = $('#igramPhotoTemplate').text();
