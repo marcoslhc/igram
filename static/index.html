@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+	<div id="main">
+		<div class="row">
+			<a id="authLink" href=""><button>Authenticate</button></a>
+		</div>
+		<div class="row">
+			<div id="grid">
+				<div id="column-1" class="column"></div>
+				<div id="column-2" class="column"></div>
+				<div id="column-3" class="column"></div>
+				<div id="column-4" class="column"></div>
+			</div>
+		</div>
+	</div>
+</body>
+<script src="jquery/dist/jquery.min.js"></script>
+<script src="js/application.js"></script>
+<script id="igramPhotoTemplate" type="text/template">
+	<div id="{{id}}">
+		<header>
+			<h3>
+				{{user.full_name}}<br/>
+				<small><a href="http://instagram.com/{{user.username}}">@{{user.username}}</a></small>
+			</h3>
+		</header>
+		<section>
+			<img alt="" src="{{images.standard_resolution.url}}">
+		</section>
+		<footer>{{caption.text}}</footer>
+	</div>
+</script>
+</html>
