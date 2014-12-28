@@ -374,17 +374,55 @@
 				e.target.models.forEach(function (elm, idx, lst) {
 					var view,
 						column = '#column-' + ((+idx%4)+1),
-						templateText = $('#igramPhotoTemplate').text();
+						type = elm.type[0].toUpperCase() + elm.type.slice(1),
+						templateText = $('#igram'+ type +'Template').text();
 					
+
 					Photo = View.build({
 						template: makeTemplate(templateText),
 						tagName: 'div',
-						className: 'photo',
+						className: elm.type,
 						render: function () {
+							var video, button,
+								video_playing = false;
+
+
 							this.$el
 							.addClass(this.className)
 							.append(this.template(elm))
 							.appendTo(column);
+
+							if(this.className == 'video') {
+								video = this.$el.find('video')[0];
+								button = this.$el.find('.play-stop span');
+
+								$(video).on('playing', function () {
+									video_playing = true;
+								});
+								$(video).on('ended', function () {
+									video_playing = false;
+									button
+									.toggleClass('fa-pause')
+									.toggleClass('fa-play');
+								});
+								this.$el.find('.play-stop').on('click', function (e) {
+									e.preventDefault();
+
+									if(video_playing) {
+										video.pause();
+										button
+										.toggleClass('fa-play')
+										.toggleClass('fa-pause');
+										video_playing = false;
+										return
+									}
+
+									button
+									.toggleClass('fa-play')
+									.toggleClass('fa-pause');
+									video.play();
+								})
+							}
 						}
 
 					});
