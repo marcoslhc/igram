@@ -77,6 +77,7 @@
 			return tmpl.replace(interpolation,
 				function (a, b) {
 					var r, matches, tmpObj, key;
+					console.log(a,b)
 					
 					if (~b.indexOf(".")) {
 						matches = b.split(".");
@@ -86,9 +87,9 @@
 							tmpObj && key && (tmpObj = tmpObj[key]);
 						}
 						
-						r = tmpObj;
+						r = tmpObj || '';
 					} else {
-						r = obj[b];
+						r = obj[b] || '';
 					}
 					
 					return typeof r === "string" || typeof r === "number" ? r : a;
@@ -264,9 +265,7 @@
 
 		build: build.bind(this),
 
-		get : function get(value) {
-
-		},
+		get : function get(value) {},
 
 		where: function where(attr, value) {
 
@@ -346,14 +345,32 @@
 					url:'http://127.0.0.1:3000/api/v1/media/search',
 					params:{
 						'lat':'26.105865599999998',
-						'lng':'-80.3666672'
+						'lng':'-80.3666672',
+						'distance':'16000'
 					}
 				},
 				{
 					url:'http://127.0.0.1:3000/api/v1/media/search',
 					params:{
 						'lat':'41.3850640',
-						'lng':'2.1734030'
+						'lng':'2.1734030',
+						'distance':'16000'
+					}
+				},
+				{
+					url:'http://127.0.0.1:3000/api/v1/media/search',
+					params:{
+						'lat':'10.1579310',
+						'lng':'-67.9972100',
+						'distance':'16000'
+					}
+				},
+				{
+					url:'http://127.0.0.1:3000/api/v1/media/search',
+					params:{
+						'lat':'40.7127840',
+						'lng':'-74.0059410',
+						'distance':'16000'
 					}
 				}
 			];
@@ -362,23 +379,59 @@
 				'access_token': window.localStorage['access_token'],
 				'client_id': IGRAM_CLIENT_ID
 			};
-counter =0;
 			renderView = function renderView(e) {
 				e.target.models.forEach(function (elm, idx, lst) {
-					counter++;
 					var view,
 						column = '#column-' + ((+idx%4)+1),
-						templateText = $('#igramPhotoTemplate').text();
+						type = elm.type[0].toUpperCase() + elm.type.slice(1),
+						templateText = $('#igram'+ type +'Template').text();
 					
+
 					Photo = View.build({
 						template: makeTemplate(templateText),
 						tagName: 'div',
-						className: 'photo',
+						className: elm.type,
 						render: function () {
+							var video, button,
+								video_playing = false;
+
+
 							this.$el
 							.addClass(this.className)
 							.append(this.template(elm))
 							.appendTo(column);
+
+							if(this.className == 'video') {
+								video = this.$el.find('video')[0];
+								button = this.$el.find('.play-stop span');
+								
+								$(video).on('playing', function () {
+									video_playing = true;
+								});
+								$(video).on('ended', function () {
+									video_playing = false;
+									button
+									.toggleClass('fa-pause')
+									.toggleClass('fa-play');
+								});
+								this.$el.find('.play-stop').on('click', function (e) {
+									e.preventDefault();
+									
+									if(video_playing) {
+										video.pause();
+										button
+										.toggleClass('fa-play')
+										.toggleClass('fa-pause');
+										video_playing = false;
+										return
+									}
+
+									button
+									.toggleClass('fa-play')
+									.toggleClass('fa-pause');
+									video.play();
+								})
+							}
 						}
 
 					});
