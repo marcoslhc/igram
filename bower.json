@@ -1,0 +1,23 @@
+{
+  "name": "igram",
+  "main": "index.js",
+  "version": "0.0.1",
+  "authors": [
+    "Marcos Hernández <marcoslhc@gmail.com>"
+  ],
+  "description": "Instagram Clone",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.3",
+    "font-awesome": "~4.2.0",
+    "normalize.css": "~3.0.2"
+  }
+}
