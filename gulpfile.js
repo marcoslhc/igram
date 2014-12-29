@@ -1,16 +1,7 @@
 var gulp = require('gulp'),
 	less = require('gulp-less'),
 	autoprefixer = require('gulp-autoprefixer'),
-	config = {
-		static: {
-			styles: {
-				sources:[
-					'static/less/*.less'
-				],
-				destination: 'static/css/'
-			}
-		}
-	};
+	config = require('./config.js')['gulp'];
 
 gulp.task('styles', function () {
 	var source = config['static']['styles']['sources'],
