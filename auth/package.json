@@ -1,0 +1,4 @@
+{
+	"name":"auth_lib",
+	"main":"./index.js"
+}
