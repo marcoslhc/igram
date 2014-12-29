@@ -196,12 +196,17 @@
 			events.push({callback: listener, context: ctx});
 		},
 
-		off: function off(name, listener) {
+		off: function off(name, listener, ctx) {
 			var listener, i, len;
 
+			ctx || (ctx = this);
 
-			if (this._listeners[name] instanceof Array) {
-				listeners = this._listeners[name];
+			if(!ctx._listeners) {
+				return;
+			}
+
+			if (ctx._listeners[name] instanceof Array) {
+				listeners = ctx._listeners[name];
 
 				for (i=0, len = listeners.length; i < len; i++) {
 					if(listeners[i].callback.toString() === listener.callback.toString()) {
@@ -228,7 +233,7 @@
 				len = listeners.length;
 				
 				while (++i < len) {
-					listeners[i].context = ctx || listeners[i].context;
+					listeners[i].context || (listeners[i].context = ctx);
 
 					if (!event.target) {
 						event.target = listeners[i].context;

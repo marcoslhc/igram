@@ -1,20 +1,9 @@
 var config = require('../config.js'),
 	urllib = require('urllib'),
-	sprintf = require('sprintf'),
-	hmac = require('crypto').createHmac;
+	signedHeader = require('./lib').signedHeader;
+	sprintf = require('sprintf');
 
 
-signed_header = function (ip) {
-	var pen, signature;
-	
-
-	pen = hmac('SHA256', config.auth.instagram['CLIENT_SECRET']);
-	signature = pen.update(ip).digest('hex');
-	
-	return {
-		'X-Insta-Forwarded-For': [ip, signature].join('|')
-	}
-}
 
 
 auth = function *() {
@@ -26,7 +15,7 @@ auth = function *() {
 
 	data = yield urllib.request(config.auth.instagram.endpoint,{
 		method:'POST',
-		headers: signed_header(client_ip),
+		headers: signedHeader(client_ip),
 		data: {
 			client_id:config.auth.instagram['CLIENT_ID'],
 			client_secret:config.auth.instagram['CLIENT_SECRET'],
