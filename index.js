@@ -4,6 +4,7 @@ var app, api,
 	cors = require('koa-cors'),
 	mount = require('koa-mount'),
 	logger = require('koa-logger'),
+	auth = require('./auth'),
 	urllib = require('urllib');
 
 
@@ -21,6 +22,7 @@ api.use(function *(next) {
 
 	yield next;
 });
+app.use(mount('/auth', auth));
 app.use(mount('/api', api));
 app.use(serve(__dirname + '/static'));
 app.use(serve(__dirname + '/bower_components'));

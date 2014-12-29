@@ -21,7 +21,8 @@ auth = {
 		'CLIENT_ID': process.env.INSTAGRAM_CLIENT_ID ||  '',
 		'CLIENT_SECRET': process.env.INSTAGRAM_CLIENT_SECRET || '',
 		'WEBSITE_URL': website.getURL,
-		'REDIRECT_URI': website.getURL
+		'REDIRECT_URI': website.getURL,
+		endpoint: 'https://api.instagram.com/oauth/access_token'
 	}
 }
 config = {

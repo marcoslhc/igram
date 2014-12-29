@@ -4,10 +4,9 @@
 	var loadHandler, getJSON, QueryString, igram_oauth_qs, Events,
 		extend, build, Collection, View,
 		IGRAM_CLIENT_ID = 'dbb576b3e12342a496f0348020197da2',
-		IGRAM_REDIRECT_URI = 'http://127.0.0.1:3000/',
-		IGRAM_RESPONSE_TYPE = 'token',
-		IGRAM_OAUT_URI = 'https://instagram.com/oauth/authorize',
-		IGRAM_;
+		IGRAM_REDIRECT_URI = 'http://127.0.0.1:3000/auth',
+		IGRAM_RESPONSE_TYPE = 'code',
+		IGRAM_OAUT_URI = 'https://instagram.com/oauth/authorize';
 
 	extend = function extend(obj) {
 		var source, prop, i, len;
@@ -77,7 +76,6 @@
 			return tmpl.replace(interpolation,
 				function (a, b) {
 					var r, matches, tmpObj, key;
-					console.log(a,b)
 					
 					if (~b.indexOf(".")) {
 						matches = b.split(".");
