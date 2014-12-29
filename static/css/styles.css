@@ -48,8 +48,8 @@ body > .deco {
   margin-left: -5px;
 }
 .nav:before {
-  background: -webkit-radial-gradient(top center, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
-  background: radial-gradient(top center, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+  background: -webkit-radial-gradient(top center, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 100%);
+  background: radial-gradient(top center, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 100%);
   margin-left: -5px;
 }
 .nav:after,
@@ -61,6 +61,7 @@ body > .deco {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: -1 !important;
 }
 .row {
   width: 100%;
