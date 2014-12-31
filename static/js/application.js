@@ -209,7 +209,7 @@
 				listeners = ctx._listeners[name];
 
 				for (i=0, len = listeners.length; i < len; i++) {
-					if(listeners[i].callback.toString() === listener.callback.toString()) {
+					if(listeners[i].callback.toString() === listener.toString()) {
 						listeners.splice(i, 1);
 
 						break;	
@@ -320,7 +320,7 @@
 
 
 		// http://xhr.spec.whatwg.org/#dom-xmlhttprequest-readystate
-			if (xhr.readyState == 4) { // `DONE`
+			if (+xhr.readyState === 4) { // `DONE`
 				status = xhr.status;
 
 				if (status == 200) {
@@ -338,10 +338,10 @@
 		var endPoints, renderView, generalParams;
 
 
-		if ((hash = window.location.hash) || window.localStorage['access_token']) {
+		if ((hash = ''+ window.location.hash) || window.localStorage['igram_access_token']) {
 			if(hash) {
-				tokInfo = hash.split('#')[1].split('=');
-				window.localStorage[tokInfo[0]] = tokInfo[1];
+				tokInfo = hash.split('#')[1].split('=')[1];
+				window.localStorage['igram_access_token'] = ''+tokInfo;
 			}
 			endPoints = [
 				{
@@ -379,7 +379,7 @@
 			];
 
 			generalParams = {
-				'access_token': window.localStorage['access_token'],
+				'access_token': window.localStorage['igram_access_token'],
 				'client_id': IGRAM_CLIENT_ID
 			};
 			renderView = function renderView(e) {
@@ -404,7 +404,7 @@
 							.append(this.template(elm))
 							.appendTo(column);
 
-							if(this.className == 'video') {
+							if(this.className === 'video') {
 								video = this.$el.find('video')[0];
 								button = this.$el.find('.play-stop span');
 								
