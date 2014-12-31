@@ -1,6 +1,6 @@
 +(function (window, factory){
-	factory($);
-}(window, function ($) {
+	factory($, window.async);
+}(window, function ($, async) {
 	var loadHandler, getJSON, QueryString, igram_oauth_qs, Events,
 		extend, build, Collection, View,
 		IGRAM_CLIENT_ID = 'dbb576b3e12342a496f0348020197da2',
@@ -303,6 +303,20 @@
 			elem = $('<' + result(this,'tagName') + '>').attr(attrs);
 			this.$el = $(elem);
 			this.el = this.$el[0];
+		},
+		init: function init() {
+			this._events();
+		},
+		_events: function _events() {
+			if (!this.events) {
+				return;
+			}
+			evts = this.events;
+			kys = Object.keys(evts)
+			while(key = kys.shift()){
+				evt = evts[key];
+				this.on(key , evt);
+			}
 		}
 	});
 
@@ -444,7 +458,7 @@
 				});
 			}
 
-			endPoints.forEach(function (elm, idx, lst) {
+			async.parallel(endPoints, function (elm, cb) {
 				var qs, collection;
 
 				extend(elm.params, generalParams);
@@ -458,6 +472,8 @@
 				photos.on('load', renderView, photos);
 
 				photos.sync();
+
+				cb();
 			});
 		} else {
 			igram_oauth_qs = new QueryString({},true);
