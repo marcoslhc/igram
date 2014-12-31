@@ -3,7 +3,7 @@
 	font-family: Libre\ Baskerville;
 	font-size:100%;
 	margin:0;
-	box-sizing: content-box;
+	box-sizing: border-box;
 }
 html, body {
 	height: 100%;
@@ -28,9 +28,10 @@ body {
 	}
 }
 
-#main {
+#main, .container {
 	width:960px;
 	margin: auto;
+	.clearfix()
 }
 .nav {
 	position: fixed;
@@ -63,9 +64,7 @@ body {
 
 	}
 }
-.row {
-	width: 100%;
-	padding: 5%;
+.clearfix {
 	display: table;
 
 	&:before{
@@ -73,30 +72,47 @@ body {
 		width:100%;
 		height: 0px;
 	}
-
 }
 
-#grid {
+@gutter: 16px;
+@num-cols:16;
+.row {
+	width: 100%;
+	margin-left:@gutter / -2;
+	margin-right:@gutter / -2;
+	.clearfix()
+}
+
+#grid{
 	width: 100%;
 	margin: auto;
-	display: table;
-
-	.column {
-		float:left;
-		width: 20%;
-		margin: 2%;
-
-		&:first-child {
-			margin-left: 0px;
-		}
-
-		&:last-child {
-			margin-right: 0px;
-		}
-	}
-
+	.clearfix()
 }
 
+.make-mods(@n, @i:1) when (@i =< @n) {
+	@size: percentage(@i / @n);
+	.mod-@{i} {
+		width: @size;
+	}
+	.push-@{i} {
+		left: @size
+	}
+	.offset-@{i} {
+		margin-left: @size
+	}
+	.make-mods(@n, (@i + 1))
+}
+
+.make-mods(@num-cols);
+
+.mod {
+	display: block;
+	position: relative;
+	float:left;
+	min-height: 1px;
+	padding-left:@gutter / 2;
+	padding-right:@gutter / 2;
+}
 
 .image, .video {
 	width: 100%;
