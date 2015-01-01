@@ -1,5 +1,5 @@
 +(function (window, factory){
-	factory($, window.async);
+	window.app = factory($, window.async);
 }(window, function ($, async) {
 	var loadHandler, getJSON, QueryString, igram_oauth_qs, Events,
 		extend, build, Collection, View,
@@ -249,7 +249,7 @@
 
 	Collection = function Collection(options) {
 		options = options || {};
-		this.models = {};
+		this.models = [];
 		this.uri = options.uri || '';
 		this.comparator =  options.comparator || '';
 		extend(this, options);
@@ -257,16 +257,7 @@
 
 	extend(Collection.prototype, Events, {
 		sync: function sync() {
-			var self = this;
-			getJSON(self.uri, function (data) {
-				self.models = data.data;
-				self.trigger('load', self);
-			}, function (err) {
-				throw new Error(err);
-			});
 		},
-
-		build: build.bind(this),
 
 		get : function get(value) {},
 
@@ -275,7 +266,15 @@
 		},
 
 		sort :function sort() {
+			var comparatorFunc;
 
+			comparatorFunc = function comparatorFunc(a, b) {
+				if (a[this.comparator] < b[this.comparator]) return -1;
+				if (a[this.comparator] > b[this.comparator]) return 1;
+				return 0;
+			}
+			this.models.sort(comparatorFunc.bind(this));
+			return this;
 		},
 
 		fetch: function fetch() {
@@ -396,13 +395,23 @@
 				'access_token': window.localStorage['igram_access_token'],
 				'client_id': IGRAM_CLIENT_ID
 			};
+
+			photoAlbum = new Collection({
+				'comparator': 'created_time'
+			});
+
+			updateAlbum = function updateAlbum(e) {
+				photoAlbum.models = Array.prototype.concat.apply(photoAlbum.models, e.target.models);
+				photoAlbum.sort();
+			}
+
 			renderView = function renderView(e) {
 				e.target.models.forEach(function (elm, idx, lst) {
 					var view,
 						column = '#column-' + ((+idx%4)+1),
 						type = elm.type[0].toUpperCase() + elm.type.slice(1),
 						templateText = $('#igram'+ type +'Template').text();
-					
+
 
 					Photo = View.build({
 						template: makeTemplate(templateText),
@@ -458,6 +467,8 @@
 				});
 			}
 
+			photoAlbum.on('load', renderView, photoAlbum);
+
 			async.parallel(endPoints, function (elm, cb) {
 				var qs, collection;
 
@@ -466,14 +477,25 @@
 				qs = new QueryString(elm.params);
 
 				photos = new Collection({
-					uri: (elm.url + qs.build())
+					uri: (elm.url + qs.build()),
+					sync: function sync() {
+						var self = this;
+						getJSON(self.uri, function (data) {
+							self.models = data.data;
+							self.trigger('load', self);
+							cb();
+						}, function (err) {
+							cb(err);
+						});
+					}
 				});
 
-				photos.on('load', renderView, photos);
+				photos.on('load', updateAlbum, photos);
 
 				photos.sync();
 
-				cb();
+			}, function () {
+				photoAlbum.trigger('load');
 			});
 		} else {
 			igram_oauth_qs = new QueryString({},true);
@@ -491,5 +513,7 @@
 
 
 	$(document).ready(loadHandler);
+
+	return this;
 
 }));
