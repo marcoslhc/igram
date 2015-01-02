@@ -94,8 +94,16 @@
 		}
 		iterate();
 	}
+	eachLimit = function(arr, limit, iterator, callback) {
+		var fn;
+
+
+		fn = _eachLimit(limit);
+		fn.apply(null, [arr, iterator, callback]);
+	}
 	return {
 		parallel: each,
-		series: eachSeries
+		series: eachSeries,
+		parallelLimit: eachLimit
 	}
 });
