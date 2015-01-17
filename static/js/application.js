@@ -1,5 +1,5 @@
 +(function (window, factory){
-	factory($, window.async);
+	window.app = factory($, window.async);
 }(window, function ($, async) {
 	var loadHandler, getJSON, QueryString, igram_oauth_qs, Events,
 		extend, build, Collection, View,
@@ -10,12 +10,12 @@
 
 	extend = function extend(obj) {
 		var source, prop, i, len;
-		
+
 
 		if (typeof obj !== 'object') {
 			return obj;
 		}
-		
+
 		for (i = 1, len = arguments.length; i < len; i++) {
 			source = arguments[i];
 			for (prop in source) {
@@ -71,25 +71,25 @@
 
 	makeTemplate = function makeTemplate(tmpl) {
 		var interpolation = /\{\{([^{}]*)\}\}/g;
-		
+
 		return function (obj) {
 			return tmpl.replace(interpolation,
 				function (a, b) {
 					var r, matches, tmpObj, key;
-					
+
 					if (~b.indexOf(".")) {
 						matches = b.split(".");
 						tmpObj = obj;
-						
+
 						while (key = matches.shift()) {
 							tmpObj && key && (tmpObj = tmpObj[key]);
 						}
-						
+
 						r = tmpObj || '';
 					} else {
 						r = obj[b] || '';
 					}
-					
+
 					return typeof r === "string" || typeof r === "number" ? r : a;
 				}
 			);
@@ -212,7 +212,7 @@
 					if(listeners[i].callback.toString() === listener.toString()) {
 						listeners.splice(i, 1);
 
-						break;	
+						break;
 					}
 				}
 			}
@@ -231,7 +231,7 @@
 			if (this._listeners[event.type] instanceof Array) {
 				listeners = this._listeners[event.type];
 				len = listeners.length;
-				
+
 				while (++i < len) {
 					listeners[i].context || (listeners[i].context = ctx);
 
@@ -249,7 +249,7 @@
 
 	Collection = function Collection(options) {
 		options = options || {};
-		this.models = {};
+		this.models = [];
 		this.uri = options.uri || '';
 		this.comparator =  options.comparator || '';
 		extend(this, options);
@@ -257,16 +257,7 @@
 
 	extend(Collection.prototype, Events, {
 		sync: function sync() {
-			var self = this;
-			getJSON(self.uri, function (data) {
-				self.models = data.data;
-				self.trigger('load', self);
-			}, function (err) {
-				throw new Error(err);
-			});
 		},
-
-		build: build.bind(this),
 
 		get : function get(value) {},
 
@@ -275,7 +266,13 @@
 		},
 
 		sort :function sort() {
+			var comparatorFunc;
 
+			comparatorFunc = function comparatorFunc(a, b) {
+				return (b[this.comparator] - a[this.comparator]);
+			}
+			this.models.sort(comparatorFunc.bind(this));
+			return this;
 		},
 
 		fetch: function fetch() {
@@ -286,6 +283,13 @@
 	View = function View(options) {
 		this.makeElement();
 		this.build = build.bind(this);
+		if (this.templateUrl) {
+			var self = this;
+			request(this.templateUrl, function (templateText) {
+				self.template = makeTemplate(templateText);
+				self.render && self.render();
+			});
+		}
 	}
 
 	extend(View.prototype, Events, {
@@ -322,30 +326,37 @@
 
 	Collection.build = View.build = build;
 
-	getJSON = function getJSON(url, successHandler, errorHandler) {
+	request = function request(url, successHandler, errorHandler) {
 		var xhr = typeof XMLHttpRequest != 'undefined'
-			? new XMLHttpRequest()
-			: new ActiveXObject('Microsoft.XMLHTTP');
-
+		? new XMLHttpRequest()
+		: new ActiveXObject('Microsoft.XMLHTTP');
 
 		xhr.open('get', url, true);
 		xhr.onreadystatechange = function() {
 			var status,data;
 
 
-		// http://xhr.spec.whatwg.org/#dom-xmlhttprequest-readystate
+			// http://xhr.spec.whatwg.org/#dom-xmlhttprequest-readystate
 			if (+xhr.readyState === 4) { // `DONE`
 				status = xhr.status;
 
 				if (status == 200) {
-					data = JSON.parse(xhr.responseText);
-					successHandler && successHandler(data);
+					successHandler && successHandler(xhr.responseText);
 				} else {
 					errorHandler && errorHandler(status);
 				}
 			}
 		};
-  		xhr.send();
+		xhr.send();
+	}
+
+	getJSON = function getJSON(url, successHandler, errorHandler) {
+		request(url, function (data) {
+			data = JSON.parse(data);
+			successHandler && successHandler(data);
+		}, function (err) {
+			errorHandler && errorHandler(err);
+		});
 	};
 
 	loadHandler = function loadHandler() {
@@ -396,57 +407,64 @@
 				'access_token': window.localStorage['igram_access_token'],
 				'client_id': IGRAM_CLIENT_ID
 			};
+
+			photoAlbum = new Collection({
+				'comparator': 'created_time'
+			});
+
+			updateAlbum = function updateAlbum(e) {
+				photoAlbum.models = Array.prototype.concat.apply(photoAlbum.models, e.target.models);
+				photoAlbum.sort();
+			}
+			window.elements = [];
 			renderView = function renderView(e) {
 				e.target.models.forEach(function (elm, idx, lst) {
 					var view,
-						column = '#column-' + ((+idx%4)+1),
-						type = elm.type[0].toUpperCase() + elm.type.slice(1),
-						templateText = $('#igram'+ type +'Template').text();
-					
+						column = '#column-' + ((+idx%4)+1);
 
 					Photo = View.build({
-						template: makeTemplate(templateText),
+						templateUrl: 'views/' + elm.type + '.html',
 						tagName: 'div',
-						className: elm.type,
+						class: elm.type,
 						render: function () {
-							var video, button,
+							var video, button, buttonLabel,
 								video_playing = false;
 
-
 							this.$el
-							.addClass(this.className)
 							.append(this.template(elm))
 							.appendTo(column);
 
-							if(this.className === 'video') {
-								video = this.$el.find('video')[0];
-								button = this.$el.find('.play-stop span');
-								
-								$(video).on('playing', function () {
+							if(this.class === 'video') {
+								video = this.$el.find('video');
+								button = this.$el.find('.play-stop');
+								buttonLabel = this.$el.find('.play-stop span');
+
+								video.on('playing', function () {
 									video_playing = true;
 								});
-								$(video).on('ended', function () {
+								video.on('ended', function () {
 									video_playing = false;
-									button
+									buttonLabel
 									.toggleClass('fa-pause')
 									.toggleClass('fa-play');
 								});
-								this.$el.find('.play-stop').on('click', function (e) {
+								button.on('click', function (e) {
 									e.preventDefault();
-									
+
 									if(video_playing) {
-										video.pause();
-										button
-										.toggleClass('fa-play')
-										.toggleClass('fa-pause');
+										console.log(buttonLabel)
+										video[0].pause();
+										buttonLabel
+										.toggleClass('fa-pause')
+										.toggleClass('fa-play');
 										video_playing = false;
 										return
 									}
 
-									button
+									buttonLabel
 									.toggleClass('fa-play')
 									.toggleClass('fa-pause');
-									video.play();
+									video[0].play();
 								})
 							}
 						}
@@ -454,9 +472,10 @@
 					});
 
 					photo = new Photo();
-					photo.render();
 				});
 			}
+
+			photoAlbum.on('load', renderView, photoAlbum);
 
 			async.parallel(endPoints, function (elm, cb) {
 				var qs, collection;
@@ -466,18 +485,29 @@
 				qs = new QueryString(elm.params);
 
 				photos = new Collection({
-					uri: (elm.url + qs.build())
+					uri: (elm.url + qs.build()),
+					sync: function sync() {
+						var self = this;
+						getJSON(self.uri, function (data) {
+							self.models = data.data;
+							self.trigger('load', self);
+							cb();
+						}, function (err) {
+							cb(err);
+						});
+					}
 				});
 
-				photos.on('load', renderView, photos);
+				photos.on('load', updateAlbum, photos);
 
 				photos.sync();
 
-				cb();
+			}, function () {
+				photoAlbum.trigger('load');
 			});
 		} else {
 			igram_oauth_qs = new QueryString({},true);
-			
+
 			igram_oauth_qs
 			.setParam('client_id', IGRAM_CLIENT_ID)
 			.setParam('redirect_uri', IGRAM_REDIRECT_URI)
@@ -491,5 +521,7 @@
 
 
 	$(document).ready(loadHandler);
+
+	return this;
 
 }));
