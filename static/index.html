@@ -6,7 +6,7 @@
 	<link rel="stylesheet" href="normalize.css/normalize.css">
 	<link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
 	<link rel="stylesheet" href="css/styles.css">
-	
+
 </head>
 <body>
 	<div class="deco"></div>
@@ -27,27 +27,4 @@
 <script src="jquery/dist/jquery.min.js"></script>
 <script src="js/async.js"></script>
 <script src="js/application.js"></script>
-<script id="igramImageTemplate" type="text/template">
-	<div id="{{id}}">
-		<a href="{{link}}">
-			<img alt="" src="{{images.standard_resolution.url}}">
-		</a>
-		<footer>
-			{{caption.text}}<br/>
-			{{user.full_name}}<br/>
-			<small><a href="http://instagram.com/{{user.username}}">@{{user.username}}</a></small>
-		</footer>
-	</div>
-</script>
-<script id="igramVideoTemplate" type="text/template">
-	<div id="{{id}}">
-		<a href="#" class="play-stop"><span class="fa fa-play"></span></a>
-		<video alt="" width=100% height=100% preload="none" poster="{{images.standard_resolution.url}}" src ="{{videos.standard_resolution.url}}">
-		<footer>
-			{{caption.text}}<br/>
-			{{user.full_name}}<br/>
-			<small><a href="http://instagram.com/{{user.username}}">@{{user.username}}</a></small>
-		</footer>
-	</div>
-</script>
 </html>
