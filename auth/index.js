@@ -27,6 +27,9 @@ auth = function *() {
 
 	if (+data.status === 200) {
 		responseData = JSON.parse(data.data.toString());
+		this.body = {
+			user: responseData.user
+		};
 		redirect = sprintf('%(URL)s#access_token=%(CODE)s', {
 			URL: config.website.getURL(),
 			CODE: responseData.access_token

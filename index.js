@@ -19,7 +19,7 @@ if(config.debug) {
 app.use(cors());
 api.use(function *(next) {
 	var url = this.request.url;
-	
+
 
 	results = yield urllib.request('https://api.instagram.com' + url);
 	this.body = results.data.toString();
@@ -28,6 +28,7 @@ api.use(function *(next) {
 });
 app.use(mount('/auth', auth));
 app.use(mount('/api', api));
+app.use(serve(__dirname + '/views'))
 app.use(serve(__dirname + '/static'));
 app.use(serve(__dirname + '/bower_components'));
 app.listen(3000);
