@@ -1,7 +1,9 @@
-+(function (window, factory){
+'use strict';
++(function (window, factory) {
 	window.app = factory($, window.async);
 }(window, function ($, async) {
-	var loadHandler, getJSON, QueryString, igram_oauth_qs, Events,
+	var result, makeTemplate, loadHandler, getJSON, QueryString,
+		IgramOauthQS, Events, request,
 		extend, build, Collection, View,
 		IGRAM_CLIENT_ID = 'dbb576b3e12342a496f0348020197da2',
 		IGRAM_REDIRECT_URI = 'http://127.0.0.1:3000/auth',
@@ -10,7 +12,6 @@
 
 	extend = function extend(obj) {
 		var source, prop, i, len;
-
 
 		if (typeof obj !== 'object') {
 			return obj;
@@ -32,7 +33,7 @@
 		var child, Surrogate,
 			parent = this;
 
-		if(protoProps && protoProps.hasOwnProperty('constructor')) {
+		if (protoProps && protoProps.hasOwnProperty('constructor')) {
 			child = protoProps.constructor;
 		} else {
 			child = function () {
@@ -47,7 +48,7 @@
 		};
 
 		Surrogate.prototype = parent.prototype;
-		child.prototype = new Surrogate;
+		child.prototype = new Surrogate();
 
 		if (protoProps) {
 			extend(child.prototype, protoProps);
@@ -56,18 +57,20 @@
 		child.__super__ = parent.prototype;
 
 		return child;
-	}
+	};
 
 	result = function result(obj, prop) {
 		var value;
 
 
-		if (!obj || !prop) return void 0;
+		if (!obj || !prop) {
+			return void 0;
+		}
 
 		value = obj[prop];
 
 		return typeof value === 'function' ? obj[prop]() : value;
-	}
+	};
 
 	makeTemplate = function makeTemplate(tmpl) {
 		var interpolation = /\{\{([^{}]*)\}\}/g;
@@ -77,8 +80,8 @@
 				function (a, b) {
 					var r, matches, tmpObj, key;
 
-					if (~b.indexOf(".")) {
-						matches = b.split(".");
+					if (!!~b.indexOf('.')) {
+						matches = b.split('.');
 						tmpObj = obj;
 
 						while (key = matches.shift()) {
@@ -90,14 +93,13 @@
 						r = obj[b] || '';
 					}
 
-					return typeof r === "string" || typeof r === "number" ? r : a;
+					return typeof r === 'string' || typeof r === 'number' ? r : a;
 				}
 			);
-		}
-	}
+		};
+	};
 
 	QueryString = function QueryString(params, persist) {
-
 
 		this.params		= params || {};
 		this.initial	= params;
@@ -110,18 +112,17 @@
 		build: function build() {
 			var i,
 			counter = 0,
-			qstring = "?";
-
+			qstring = '?';
 
 			if (Object.keys(this.params).length <= 0) {
-				return "";
+				return '';
 			}
 
 			for (i in this.params) {
 				if (counter !== 0) {
-					qstring += "&";
+					qstring += '&';
 				}
-				qstring += i + "=" + encodeURIComponent(this.params[i]);
+				qstring += i + '=' + encodeURIComponent(this.params[i]);
 				counter++;
 			}
 
@@ -131,7 +132,6 @@
 		},
 
 		reset: function reset(initial) {
-
 
 			if (!this.persists) {
 				this.params = {};
@@ -144,7 +144,6 @@
 
 		addParam: function addParam(param, value) {
 			var key;
-
 
 			if (typeof param === 'object') {
 				key = Object.keys(param)[0];
@@ -165,7 +164,6 @@
 
 		setParam: function setParam(param, value, swPersists) {
 			var key;
-
 
 			if (typeof param === 'object') {
 				swPersists = value;
@@ -197,7 +195,7 @@
 		},
 
 		off: function off(name, listener, ctx) {
-			var listener, i, len;
+			var listeners, i, len;
 
 			ctx || (ctx = this);
 
@@ -208,8 +206,8 @@
 			if (ctx._listeners[name] instanceof Array) {
 				listeners = ctx._listeners[name];
 
-				for (i=0, len = listeners.length; i < len; i++) {
-					if(listeners[i].callback.toString() === listener.toString()) {
+				for (i = 0, len = listeners.length; i < len; i++) {
+					if (listeners[i].callback.toString() === listener.toString()) {
 						listeners.splice(i, 1);
 
 						break;
@@ -219,7 +217,8 @@
 		},
 
 		trigger: function trigger(event, ctx) {
-			var listeners, i =-1, len, event;
+			var listeners, len,
+				i = -1;
 
 			if (!this._listeners) {
 				return this;
@@ -245,7 +244,7 @@
 			}
 		}
 
-	}
+	};
 
 	Collection = function Collection(options) {
 		options = options || {};
@@ -253,24 +252,24 @@
 		this.uri = options.uri || '';
 		this.comparator =  options.comparator || '';
 		extend(this, options);
-	}
+	};
 
 	extend(Collection.prototype, Events, {
 		sync: function sync() {
 		},
 
-		get : function get(value) {},
+		get: function get(value) {},
 
 		where: function where(attr, value) {
 
 		},
 
-		sort :function sort() {
+		sort:function sort() {
 			var comparatorFunc;
 
 			comparatorFunc = function comparatorFunc(a, b) {
 				return (b[this.comparator] - a[this.comparator]);
-			}
+			};
 			this.models.sort(comparatorFunc.bind(this));
 			return this;
 		},
@@ -290,21 +289,30 @@
 				self.render && self.render();
 			});
 		}
-	}
+	};
 
 	extend(View.prototype, Events, {
 		tagName: 'div',
 		render: function render() {},
 		makeElement: function makeElement() {
-			var elem,
+			var elem, attr,
 				attrs = extend({}, result(this, 'attributes'));
 
 
-			if (this.id) attrs.id = result(this, 'id');
+			if (this.id) {
+				attrs.id = result(this, 'id');
+			}
 
-			if (this.class) attrs['class'] = result(this, 'class');
+			if (this.class) {
+				attrs['class'] = result(this, 'class');
+			}
 
-			elem = $('<' + result(this,'tagName') + '>').attr(attrs);
+			elem = document.createElement(result(this, 'tagName'));
+
+			for (attr in attrs) {
+				elem.setAttribute(attr, attrs[attr]);
+			}
+
 			this.$el = $(elem);
 			this.el = this.$el[0];
 		},
@@ -312,12 +320,14 @@
 			this._events();
 		},
 		_events: function _events() {
+			var evts, evt, kys, key;
+
 			if (!this.events) {
 				return;
 			}
 			evts = this.events;
-			kys = Object.keys(evts)
-			while(key = kys.shift()){
+			kys = Object.keys(evts);
+			while (key = kys.shift()) {
 				evt = evts[key];
 				this.on(key , evt);
 			}
@@ -327,20 +337,20 @@
 	Collection.build = View.build = build;
 
 	request = function request(url, successHandler, errorHandler) {
-		var xhr = typeof XMLHttpRequest != 'undefined'
-		? new XMLHttpRequest()
-		: new ActiveXObject('Microsoft.XMLHTTP');
+		var xhr = typeof XMLHttpRequest !== 'undefined' ?
+		new XMLHttpRequest() :
+		new ActiveXObject('Microsoft.XMLHTTP');
 
 		xhr.open('get', url, true);
 		xhr.onreadystatechange = function() {
-			var status,data;
+			var status, data;
 
 
 			// http://xhr.spec.whatwg.org/#dom-xmlhttprequest-readystate
 			if (+xhr.readyState === 4) { // `DONE`
 				status = xhr.status;
 
-				if (status == 200) {
+				if (status === 200) {
 					successHandler && successHandler(xhr.responseText);
 				} else {
 					errorHandler && errorHandler(status);
@@ -348,7 +358,7 @@
 			}
 		};
 		xhr.send();
-	}
+	};
 
 	getJSON = function getJSON(url, successHandler, errorHandler) {
 		request(url, function (data) {
@@ -360,13 +370,15 @@
 	};
 
 	loadHandler = function loadHandler() {
-		var endPoints, renderView, generalParams;
+		var photoAlbum, tokInfo, hash, endPoints,
+			renderView, generalParams, updateAlbum,
+			link;
 
 
-		if ((hash = ''+ window.location.hash) || window.localStorage['igram_access_token']) {
-			if(hash) {
+		if ((hash = '' + window.location.hash) || window.localStorage['igram_access_token']) {
+			if (hash) {
 				tokInfo = hash.split('#')[1].split('=')[1];
-				window.localStorage['igram_access_token'] = ''+tokInfo;
+				window.localStorage['igram_access_token'] = '' + tokInfo;
 			}
 			endPoints = [
 				{
@@ -413,14 +425,17 @@
 			});
 
 			updateAlbum = function updateAlbum(e) {
-				photoAlbum.models = Array.prototype.concat.apply(photoAlbum.models, e.target.models);
+				photoAlbum.models = Array.prototype.concat.apply(
+					photoAlbum.models, e.target.models
+				);
 				photoAlbum.sort();
-			}
+			};
+
 			window.elements = [];
 			renderView = function renderView(e) {
-				e.target.models.forEach(function (elm, idx, lst) {
-					var view,
-						column = '#column-' + ((+idx%4)+1);
+				e.target.models.forEach(function (elm, idx) {
+					var Photo, photo,
+						column = '#column-' + ((parseInt(idx) % 4) + 1);
 
 					Photo = View.build({
 						templateUrl: 'views/' + elm.type + '.html',
@@ -428,7 +443,7 @@
 						class: elm.type,
 						render: function () {
 							var video, button, buttonLabel,
-								video_playing = false;
+								videoPlaying = false;
 
 							this.$el
 							.append(this.template(elm))
@@ -440,10 +455,10 @@
 								buttonLabel = this.$el.find('.play-stop span');
 
 								video.on('playing', function () {
-									video_playing = true;
+									videoPlaying = true;
 								});
 								video.on('ended', function () {
-									video_playing = false;
+									videoPlaying = false;
 									buttonLabel
 									.toggleClass('fa-pause')
 									.toggleClass('fa-play');
@@ -451,21 +466,20 @@
 								button.on('click', function (e) {
 									e.preventDefault();
 
-									if(video_playing) {
-										console.log(buttonLabel)
+									if (videoPlaying) {
 										video[0].pause();
 										buttonLabel
 										.toggleClass('fa-pause')
 										.toggleClass('fa-play');
-										video_playing = false;
-										return
+										videoPlaying = false;
+										return;
 									}
 
 									buttonLabel
 									.toggleClass('fa-play')
 									.toggleClass('fa-pause');
 									video[0].play();
-								})
+								});
 							}
 						}
 
@@ -473,12 +487,12 @@
 
 					photo = new Photo();
 				});
-			}
+			};
 
 			photoAlbum.on('load', renderView, photoAlbum);
 
 			async.parallel(endPoints, function (elm, cb) {
-				var qs, collection;
+				var qs, photos;
 
 				extend(elm.params, generalParams);
 
@@ -506,19 +520,17 @@
 				photoAlbum.trigger('load');
 			});
 		} else {
-			igram_oauth_qs = new QueryString({},true);
+			IgramOauthQS = new QueryString({}, true);
 
-			igram_oauth_qs
+			IgramOauthQS
 			.setParam('client_id', IGRAM_CLIENT_ID)
 			.setParam('redirect_uri', IGRAM_REDIRECT_URI)
-			.setParam('response_type', IGRAM_RESPONSE_TYPE)
+			.setParam('response_type', IGRAM_RESPONSE_TYPE);
 
 			link = document.getElementById('authLink');
-			link.href = IGRAM_OAUT_URI + igram_oauth_qs.build();
+			link.href = IGRAM_OAUT_URI + IgramOauthQS.build();
 		}
-	}
-
-
+	};
 
 	$(document).ready(loadHandler);
 

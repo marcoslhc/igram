@@ -1,0 +1,8 @@
+.clearfix {
+  display: table;
+}
+.clearfix:before {
+  content: '';
+  width: 100%;
+  height: 0px;
+}

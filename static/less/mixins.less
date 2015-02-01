@@ -1,0 +1,24 @@
+.make-columns(@n, @i:1) when (@i =< @n) {
+	@size: percentage(@i / @n);
+	.column-@{i} {
+		width: @size;
+	}
+	.push-@{i} {
+		left: @size
+	}
+	.offset-@{i} {
+		margin-left: @size
+	}
+	.make-columns(@n, (@i + 1))
+}
+
+
+.clearfix {
+	display: table;
+
+	&:before{
+		content: '';
+		width:100%;
+		height: 0px;
+	}
+}
